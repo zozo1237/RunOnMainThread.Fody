@@ -13,6 +13,7 @@ public partial class ModuleWeaver
         var privateMethod = new MethodDefinition(privateMethodName, HideBySig | Private, ModuleDefinition.TypeSystem.Void);
         containingType.Methods.Add(privateMethod);
 
+
         //Moves the instructions from the annotated method into our recently created private method
         var il = method.Body.GetILProcessor();
         var privateIl = privateMethod.Body.GetILProcessor();
@@ -31,7 +32,7 @@ public partial class ModuleWeaver
         il.Append(il.Create(OpCodes.Ldarg_0));
         il.Append(il.Create(OpCodes.Ldftn, privateMethod));
         il.Append(il.Create(OpCodes.Newobj, ActionConstructor));
-        il.Append(il.Create(OpCodes.Call, RunOnMainThread));
+        il.Append(il.Create(OpCodes.Call, method.Module.ImportReference(RunOnMainThread)));
         il.Append(il.Create(OpCodes.Nop));
         il.Append(il.Create(OpCodes.Ret));
     }

@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Windows;
+using System.Windows.Threading;
 
 namespace RunOnMainThread
 {
     public static class MainThreadDispatcher
     {
         public static void RunOnMainThread(Action action)
-            => throw new PlatformNotSupportedException("No platform specific MainThreadDispatcher has been provided for this platform");
+        {
+            Application.Current.Dispatcher.Invoke(action);
+        }
     }
 }

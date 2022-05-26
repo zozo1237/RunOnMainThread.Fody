@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Fody;
 using Mono.Cecil;
 
-public partial class ModuleWeaver
+public partial class ModuleWeaver : BaseModuleWeaver
 {
-    public ModuleDefinition ModuleDefinition { get; set; }
-
-    public void Execute()
+    public override void Execute()
     {
         Initialize();
 
@@ -31,7 +30,7 @@ public partial class ModuleWeaver
                         break;
 
                     case WeaverKind.None:
-                        LogErrorPoint(ReturnTypeMustBeVoid, weaverInfo.SequencePoint);
+                        WriteError(ReturnTypeMustBeVoid, weaverInfo.SequencePoint);
                         break;
                 }
 
@@ -42,28 +41,24 @@ public partial class ModuleWeaver
         }
     }
 
+    public override IEnumerable<string> GetAssembliesForScanning()
+    {
+        yield return "RunOnMainThread";
+        yield return "MainThreadDispatcher";
+        yield return "RunOnMainThread"; //Todo: Not sure if this needs to be here
+        yield return "netstandard";
+        yield return "mscorlib";
+    }
+
     private void Initialize()
     {
-        //Assemblies
-        RunOnMainThreadAssembly = FindAssembly(RunOnMainThreadAssemblyName);
-
         //Types
-        Void = ModuleDefinition.TypeSystem.Void;
-        Bool = ModuleDefinition.TypeSystem.Boolean;
+        Void = TypeSystem.VoidReference;
+        Bool = TypeSystem.VoidReference;
 
-        MainThreadDispatcher = new TypeReference(
-            RunOnMainthreadNamespaceName, MainThreadDispatcherTypeName,
-            ModuleDefinition, RunOnMainThreadAssembly);
-
-        Action = new TypeReference(
-            SystemAssemblyName,
-            ActionTypeName,
-            ModuleDefinition, ModuleDefinition.TypeSystem.CoreLibrary);
-
-        MainThreadAttribute = new TypeReference(
-            RunOnMainThreadAssemblyName,
-            RunOnMainThreadAttributeTypeName,
-            ModuleDefinition, RunOnMainThreadAssembly);
+        MainThreadDispatcher = FindTypeDefinition(MainThreadDispatcherTypeName);
+        Action = FindTypeDefinition(ActionTypeName);
+        MainThreadAttribute = FindTypeDefinition(RunOnMainThreadAttributeTypeName);
 
         //Methods
         ActionConstructor = ModuleDefinition.ImportReference(typeof(Action).GetConstructors().Single());
@@ -72,8 +67,6 @@ public partial class ModuleWeaver
         RunOnMainThread.Parameters.Add(new ParameterDefinition(Action));
     }
 
-    private AssemblyNameReference FindAssembly(string assemblyName)
-        => ModuleDefinition.AssemblyReferences.SingleOrDefault(a => a.Name == assemblyName);
 
     private IEnumerable<MethodDefinition> MethodsToWeave(TypeDefinition type)
         => type.Methods.Where(MethodHasMainThreadAttribute);

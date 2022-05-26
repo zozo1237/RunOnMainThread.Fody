@@ -1,10 +1,21 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="RunOnMainThread.Fody" Version="0.2.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Fody" Version="6.6.2">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\RunOnMainThread\RunOnMainThread.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<WeaverFiles Include="$(SolutionDir)RunOnMainThread.Fody\obj\$(Configuration)\netstandard2.0\RunOnMainThread.Fody.dll" />
+	</ItemGroup>
 </Project>

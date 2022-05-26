@@ -4,21 +4,6 @@ using Mono.Cecil.Cil;
 
 public partial class ModuleWeaver
 {
-    // Will log an MessageImportance.High message to MSBuild. OPTIONAL
-    public Action<string> LogInfo { get; set; }
-
-    // Will log an warning message to MSBuild. OPTIONAL
-    public Action<string> LogWarning { get; set; }
-
-    // Will log an error message to MSBuild. OPTIONAL
-    public Action<string> LogError { get; set; }
-
-    // Will log an warning message to MSBuild at a specific point in the code. OPTIONAL
-    public Action<string, SequencePoint> LogWarningPoint { get; set; }
-
-    // Will log an error message to MSBuild at a specific point in the code. OPTIONAL
-    public Action<string, SequencePoint> LogErrorPoint { get; set; }
-
     private const string ReturnTypeMustBeVoid = "You can only use the RunOnMainThreadAttribute on void methods";
 
     private const string ActionTypeName = "Action";
@@ -34,9 +19,9 @@ public partial class ModuleWeaver
 
     private TypeReference Bool;
     private TypeReference Void;
-    private TypeReference Action;
-    private TypeReference MainThreadAttribute;
-    private TypeReference MainThreadDispatcher;
+    private TypeDefinition Action;
+    private TypeDefinition MainThreadAttribute;
+    private TypeDefinition MainThreadDispatcher;
 
     private MethodReference RunOnMainThread;
     private MethodReference ActionConstructor;
